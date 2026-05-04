@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1a472a"/>
+      <stop offset="100%" stop-color="#0a0f0a"/>
+    </radialGradient>
+    <radialGradient id="ballGrad" cx="38%" cy="32%" r="60%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#e8e8e8"/>
+      <stop offset="100%" stop-color="#b0b0b0"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00c853" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#00c853" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow-filter">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="circle-clip">
+      <circle cx="256" cy="256" r="220"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+
+  <!-- Pitch lines -->
+  <g clip-path="url(#circle-clip)" opacity="0.12">
+    <line x1="256" y1="36" x2="256" y2="476" stroke="#00c853" stroke-width="2"/>
+    <circle cx="256" cy="256" r="80" fill="none" stroke="#00c853" stroke-width="2"/>
+    <rect x="36" y="176" width="60" height="160" fill="none" stroke="#00c853" stroke-width="2"/>
+    <rect x="416" y="176" width="60" height="160" fill="none" stroke="#00c853" stroke-width="2"/>
+  </g>
+
+  <!-- Glow effect behind ball -->
+  <circle cx="256" cy="240" r="160" fill="url(#glow)"/>
+
+  <!-- Ball shadow -->
+  <ellipse cx="256" cy="380" rx="100" ry="20" fill="#000" opacity="0.4"/>
+
+  <!-- Football -->
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="230" r="130" fill="url(#ballGrad)"/>
+
+    <!-- Pentagon patches - classic football pattern -->
+    <!-- Center pentagon -->
+    <polygon points="256,140 292,166 278,208 234,208 220,166" fill="#111" opacity="0.85"/>
+
+    <!-- Top right -->
+    <polygon points="320,160 348,188 336,218 304,218 296,186" fill="#111" opacity="0.85"/>
+
+    <!-- Top left -->
+    <polygon points="192,160 216,186 204,218 172,218 164,188" fill="#111" opacity="0.85"/>
+
+    <!-- Bottom center -->
+    <polygon points="256,308 288,284 300,252 212,252 224,284" fill="#111" opacity="0.85"/>
+
+    <!-- Bottom right -->
+    <polygon points="316,298 340,272 332,244 308,252 300,280" fill="#111" opacity="0.85"/>
+
+    <!-- Bottom left -->
+    <polygon points="196,298 172,272 180,244 204,252 212,280" fill="#111" opacity="0.85"/>
+
+    <!-- Shine -->
+    <ellipse cx="220" cy="175" rx="35" ry="22" fill="white" opacity="0.35" transform="rotate(-20,220,175)"/>
+    <ellipse cx="210" cy="168" rx="12" ry="8" fill="white" opacity="0.5" transform="rotate(-20,210,168)"/>
+  </g>
+
+  <!-- Gold trophy icon small -->
+  <g transform="translate(350, 90) scale(0.7)" opacity="0.9">
+    <path d="M30,0 L70,0 L70,40 Q70,70 50,80 Q30,70 30,40 Z" fill="#ffd700"/>
+    <rect x="42" y="80" width="16" height="20" fill="#ffd700"/>
+    <rect x="30" y="100" width="40" height="8" rx="4" fill="#ffd700"/>
+    <path d="M70,10 Q90,10 90,30 Q90,50 70,50" fill="none" stroke="#ffd700" stroke-width="8" stroke-linecap="round"/>
+    <path d="M30,10 Q10,10 10,30 Q10,50 30,50" fill="none" stroke="#ffd700" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- Stars decoration -->
+  <g fill="#ffd700" opacity="0.8">
+    <polygon points="80,80 85,95 100,95 88,104 92,119 80,110 68,119 72,104 60,95 75,95" transform="scale(0.6) translate(60,60)"/>
+    <polygon points="80,80 85,95 100,95 88,104 92,119 80,110 68,119 72,104 60,95 75,95" transform="scale(0.4) translate(880,120)"/>
+    <polygon points="80,80 85,95 100,95 88,104 92,119 80,110 68,119 72,104 60,95 75,95" transform="scale(0.35) translate(200,1100)"/>
+  </g>
+
+  <!-- Bottom text -->
+  <text x="256" y="420" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="36" font-weight="900" fill="#ffffff" letter-spacing="2">كرة الملوك</text>
+  <text x="256" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#00c853" letter-spacing="4">KING BALL</text>
+
+  <!-- Green border glow -->
+  <rect width="512" height="512" rx="100" fill="none" stroke="#00c853" stroke-width="3" opacity="0.4"/>
+</svg>
