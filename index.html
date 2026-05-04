@@ -3,10 +3,1252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snake Game</title>
+<title>⚽ مسابقة كرة القدم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00c853;
+    --dark-green: #007a33;
+    --gold: #ffd700;
+    --dark: #0a0f0a;
+    --card: #0d1a0d;
+    --card2: #112011;
+    --border: #1e3a1e;
+    --text: #e8f5e9;
+    --muted: #7cb87c;
+    --red: #ff3d3d;
+    --blue: #29b6f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Pitch lines background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(0,200,83,0.04) 80px),
+      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(0,200,83,0.04) 80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,200,83,0.07);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ========== HEADER ========== */
+  .header {
+    text-align: center;
+    padding: 36px 0 24px;
+    animation: fadeDown 0.6s ease;
+  }
+
+  .header .ball {
+    font-size: 64px;
+    display: block;
+    animation: spin 8s linear infinite;
+    filter: drop-shadow(0 0 20px rgba(0,200,83,0.4));
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 30%, var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 10px 0 4px;
+    letter-spacing: -1px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  /* ========== SCREENS ========== */
+  .screen { display: none; animation: fadeUp 0.4s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ========== CARDS ========== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  .card h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ========== HOW TO PLAY ========== */
+  .how-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .how-item {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+
+  .how-item .icon { font-size: 1.8rem; margin-bottom: 6px; display: block; }
+  .how-item strong { display: block; font-size: 0.85rem; color: var(--text); margin-bottom: 4px; }
+  .how-item span { font-size: 0.75rem; color: var(--muted); }
+
+  /* ========== BUTTONS ========== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green), var(--dark-green));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0,200,83,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,200,83,0.45);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #e6a800);
+    color: #000;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+  }
+
+  .btn-small {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  /* ========== PLAYERS ========== */
+  .players-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .player-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--dark-green);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .player-row input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+  }
+
+  .player-row input::placeholder { color: var(--muted); }
+
+  .btn-remove {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .btn-remove:hover { color: var(--red); background: rgba(255,61,61,0.1); }
+
+  /* ========== QUESTIONS COUNT ========== */
+  .count-control {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+    margin: 8px 0;
+  }
+
+  .count-control button {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card2);
+    color: var(--green);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .count-control button:hover { background: var(--dark-green); border-color: var(--green); }
+
+  .count-display {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--green);
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* ========== LEVELS ========== */
+  .levels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  .level-btn {
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+
+  .level-btn:hover { border-color: var(--green); }
+
+  .level-btn.selected {
+    border-color: var(--green);
+    background: rgba(0,200,83,0.1);
+    box-shadow: 0 0 16px rgba(0,200,83,0.2);
+  }
+
+  .level-btn .lv-icon { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+  .level-btn .lv-name { font-weight: 700; font-size: 0.9rem; display: block; }
+  .level-btn .lv-time { font-size: 0.72rem; color: var(--muted); margin-top: 4px; display: block; }
+
+  /* ========== GAME SCREEN ========== */
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .current-player-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    flex: 1;
+  }
+
+  .player-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), var(--dark-green));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .player-info small { color: var(--muted); font-size: 0.75rem; display: block; }
+  .player-info strong { font-size: 1rem; display: block; }
+
+  .score-badge {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    text-align: center;
+    margin-right: 10px;
+  }
+
+  .score-badge small { color: var(--muted); font-size: 0.7rem; display: block; }
+  .score-badge strong { font-size: 1.4rem; color: var(--gold); font-weight: 900; }
+
+  /* Timer */
+  .timer-ring {
+    position: relative;
+    width: 72px; height: 72px;
+    flex-shrink: 0;
+  }
+
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle { fill: none; }
+  .timer-ring .track { stroke: var(--border); stroke-width: 5; }
+  .timer-ring .progress { stroke: var(--green); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+  .timer-ring .number {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; font-weight: 900; color: var(--green);
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .q-num { color: var(--muted); font-size: 0.85rem; }
+  .q-cat {
+    background: rgba(0,200,83,0.12);
+    color: var(--green);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+  }
+
+  .q-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* Options */
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .option-btn {
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--green);
+    background: rgba(0,200,83,0.08);
+    transform: translateY(-1px);
+  }
+
+  .option-btn .opt-letter {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  .option-btn.correct { border-color: var(--green); background: rgba(0,200,83,0.2); }
+  .option-btn.wrong { border-color: var(--red); background: rgba(255,61,61,0.15); }
+  .option-btn:disabled { cursor: default; }
+
+  /* Bonus */
+  .bonus-bar {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .bonus-bar span { color: var(--gold); font-weight: 700; }
+
+  /* Feedback */
+  .feedback {
+    text-align: center;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: none;
+  }
+
+  .feedback.correct { background: rgba(0,200,83,0.15); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+  .feedback.wrong { background: rgba(255,61,61,0.1); color: var(--red); border: 1px solid rgba(255,61,61,0.2); }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+  .progress-track { height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), #69f0ae); border-radius: 999px; transition: width 0.4s; }
+
+  /* ========== RESULTS ========== */
+  .results-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: all 0.3s;
+  }
+
+  .result-row.first { border-color: var(--gold); background: rgba(255,215,0,0.07); }
+  .result-row.second { border-color: #bdbdbd; }
+  .result-row.third { border-color: #a0724a; }
+
+  .result-rank { font-size: 1.6rem; width: 36px; text-align: center; flex-shrink: 0; }
+  .result-name { flex: 1; font-weight: 700; font-size: 1rem; }
+  .result-stats { text-align: center; }
+  .result-stats small { display: block; color: var(--muted); font-size: 0.72rem; }
+  .result-stats strong { display: block; font-size: 1.3rem; font-weight: 900; color: var(--gold); }
+
+  .result-correct { color: var(--green); font-size: 0.8rem; }
+
+  /* Player transition screen */
+  .transition-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .transition-screen .big-emoji { font-size: 80px; display: block; margin-bottom: 20px; }
+  .transition-screen h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
+  .transition-screen p { color: var(--muted); margin-bottom: 30px; }
+  .transition-screen .score-show { font-size: 3rem; font-weight: 900; color: var(--gold); margin-bottom: 8px; }
+
+  /* Buttons row */
+  .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+  .btn-row .btn { flex: 1; }
+
+  /* Sound toggle */
+  .sound-toggle {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+
+  .sound-toggle:hover, .sound-toggle.on { color: var(--green); border-color: var(--green); }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .how-grid { grid-template-columns: 1fr 1fr; }
+    .header h1 { font-size: 1.8rem; }
+    .levels-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Shake animation */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  .shake { animation: shake 0.4s ease; }
+
+  /* Pulse correct */
+  @keyframes pulseGreen {
+    0% { box-shadow: 0 0 0 0 rgba(0,200,83,0.5); }
+    100% { box-shadow: 0 0 0 20px rgba(0,200,83,0); }
+  }
+
+  .pulse-correct { animation: pulseGreen 0.6s ease; }
+</style>
 </head>
 <body>
-<h1>Snake Game جاهزة</h1>
-<p>ضع هنا كود اللعبة الكامل الذي أرسلته.</p>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header" id="mainHeader">
+    <span class="ball">⚽</span>
+    <h1>مسابقة كرة القدم</h1>
+    <p>اختبر معلوماتك في عالم الكرة المستديرة</p>
+  </div>
+
+  <!-- ======== SCREEN 1: HOME ======== -->
+  <div class="screen active" id="screenHome" style="display:none"></div>
+
+  <!-- ======== SCREEN 2: SETUP ======== -->
+  <div class="screen active" id="screenSetup">
+    <div class="card">
+      <h2>👥 اللاعبون</h2>
+      <div class="players-list" id="playersList"></div>
+      <button class="btn btn-secondary btn-small" onclick="addPlayer()" id="addPlayerBtn">+ إضافة لاعب</button>
+    </div>
+
+    <div class="card">
+      <h2>❓ عدد الأسئلة لكل لاعب</h2>
+      <div class="count-control">
+        <button onclick="changeCount(-1)">−</button>
+        <div class="count-display" id="countDisplay">10</div>
+        <button onclick="changeCount(1)">+</button>
+      </div>
+      <p style="text-align:center; color:var(--muted); font-size:0.8rem;">(بين 5 و 20 سؤالاً)</p>
+    </div>
+
+    <div class="card">
+      <h2>🎯 مستوى الصعوبة</h2>
+      <div class="levels-grid">
+        <div class="level-btn" onclick="selectLevel('easy', this)">
+          <span class="lv-icon">🌱</span>
+          <span class="lv-name">هاوٍ</span>
+          <span class="lv-time">20 ثانية</span>
+        </div>
+        <div class="level-btn" onclick="selectLevel('medium', this)">
+          <span class="lv-icon">⭐</span>
+          <span class="lv-name">محترف</span>
+          <span class="lv-time">17 ثانية</span>
+        </div>
+        <div class="level-btn" onclick="selectLevel('hard', this)">
+          <span class="lv-icon">👑</span>
+          <span class="lv-name">أسطورة</span>
+          <span class="lv-time">15 ثانية</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="startGame()">🎮 ابدأ المسابقة</button>
+  </div>
+
+  <!-- ======== SCREEN 3: PLAYER TRANSITION ======== -->
+  <div class="screen" id="screenTransition">
+    <div class="transition-screen">
+      <span class="big-emoji" id="transitionEmoji">👤</span>
+      <h2 id="transitionName">اللاعب</h2>
+      <p id="transitionSubtitle">استعد للإجابة!</p>
+      <div class="score-show" id="transitionPrevScore" style="display:none"></div>
+      <button class="btn btn-primary" onclick="beginPlayerTurn()" style="max-width:280px; margin:0 auto;">
+        ▶️ ابدأ دوري
+      </button>
+    </div>
+  </div>
+
+  <!-- ======== SCREEN 4: GAME ======== -->
+  <div class="screen" id="screenGame">
+    <div class="game-header">
+      <div class="current-player-badge">
+        <div class="player-avatar" id="gamePlayerAvatar">?</div>
+        <div class="player-info">
+          <small>اللاعب الحالي</small>
+          <strong id="gamePlayerName">—</strong>
+        </div>
+      </div>
+      <div class="score-badge">
+        <small>النقاط</small>
+        <strong id="gameScore">0</strong>
+      </div>
+      <button class="sound-toggle on" id="soundBtn" onclick="toggleSound()" title="صوت">🔊</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="qProgressLabel">سؤال 1 من 10</span>
+        <span id="qProgressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="qProgressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="q-num" id="qNum">سؤال 1</span>
+        <span class="q-cat" id="qCat">تصنيف</span>
+      </div>
+      <div class="q-text" id="qText">...</div>
+      <div class="bonus-bar">⚡ مكافأة السرعة: <span id="bonusDisplay">+0</span></div>
+
+      <!-- Timer -->
+      <div style="display:flex; justify-content:center; margin-bottom:18px;">
+        <div class="timer-ring">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle class="track" cx="36" cy="36" r="31"/>
+            <circle class="progress" id="timerCircle" cx="36" cy="36" r="31"/>
+          </svg>
+          <div class="number" id="timerNum">20</div>
+        </div>
+      </div>
+
+      <div class="options-grid" id="optionsGrid"></div>
+    </div>
+
+    <div class="feedback" id="feedbackBox"></div>
+    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">التالي ←</button>
+  </div>
+
+  <!-- ======== SCREEN 5: RESULTS ======== -->
+  <div class="screen" id="screenResults">
+    <div class="card">
+      <h2>🏆 النتائج النهائية</h2>
+      <p style="color:var(--muted); margin-bottom:16px; font-size:0.88rem;">شكراً لجميع المشاركين – ها هي النتائج!</p>
+      <div class="results-list" id="resultsList"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="restartSame()">🔄 نفس الإعدادات</button>
+        <button class="btn btn-primary" onclick="goHome()">🏠 الرئيسية</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ============================================================
+//  QUESTIONS DATABASE
+// ============================================================
+const allQuestions = {
+  easy: [
+    { q:"كم عدد لاعبي كل فريق في كرة القدم؟", opts:["9","10","11","12"], ans:2, cat:"قواعد" },
+    { q:"ما هو الفريق الذي يُلقب بـ 'البارصا'؟", opts:["ريال مدريد","برشلونة","يوفنتوس","مانشستر سيتي"], ans:1, cat:"أندية" },
+    { q:"أين تُقام نهائيات دوري أبطال أوروبا؟", opts:["لندن دائماً","باريس دائماً","تتغير كل عام","مدريد دائماً"], ans:2, cat:"بطولات" },
+    { q:"ما هي مدة مباراة كرة القدم الرسمية؟", opts:["80 دقيقة","90 دقيقة","100 دقيقة","120 دقيقة"], ans:1, cat:"قواعد" },
+    { q:"ما اسم جائزة أفضل لاعب في العالم التي تمنحها فيفا؟", opts:["الكرة الذهبية","حذاء ذهبي","جائزة فيفا","الكأس الذهبي"], ans:0, cat:"جوائز" },
+    { q:"من هو صاحب الرقم القياسي في تسجيل أهداف كأس العالم عبر التاريخ؟", opts:["ميسي","رونالدو","رونالدو البرازيلي","مولر"], ans:3, cat:"كأس العالم" },
+    { q:"في أي دولة تأسس كأس العالم لكرة القدم عام 1930؟", opts:["البرازيل","إيطاليا","الأرجنتين","أوروغواي"], ans:3, cat:"تاريخ" },
+    { q:"ما هو لون بطاقة الإنذار في كرة القدم؟", opts:["حمراء","صفراء","خضراء","برتقالية"], ans:1, cat:"قواعد" },
+    { q:"ما هي الدولة الأكثر فوزاً بكأس العالم؟", opts:["ألمانيا","إيطاليا","البرازيل","الأرجنتين"], ans:2, cat:"كأس العالم" },
+    { q:"ما هو الاسم الرسمي للهيئة المنظمة لكرة القدم العالمية؟", opts:["UEFA","FIFA","CONMEBOL","FA"], ans:1, cat:"تنظيم" },
+    { q:"أي فريق يلعب في ملعب برنابيو؟", opts:["أتلتيكو مدريد","إشبيلية","ريال مدريد","بيتيس"], ans:2, cat:"أندية" },
+    { q:"ما هي المسافة القانونية للتصويت على الأرجل؟", opts:["10 أمتار","9.15 متر","8 أمتار","12 متراً"], ans:1, cat:"قواعد" },
+    { q:"كم مرة فازت ألمانيا بكأس العالم؟", opts:["3","4","5","6"], ans:1, cat:"كأس العالم" },
+    { q:"ما هو الفريق الإيطالي الذي يُعرف بـ 'السيدة العجوز'؟", opts:["ميلان","إنتر ميلان","روما","يوفنتوس"], ans:3, cat:"أندية" },
+    { q:"أي لاعب يُعرف بـ 'الدون'؟", opts:["رونالدو","ميسي","بيكهام","زيدان"], ans:0, cat:"لاعبون" },
+    { q:"ما هي نقمة ضربة الجزاء؟", opts:["من 11 متراً","من 10 أمتار","من 9 أمتار","من 12 متراً"], ans:0, cat:"قواعد" },
+    { q:"ما هو لون قميص المنتخب البرازيلي الأصفر؟", opts:["أخضر","أصفر","أبيض","أزرق"], ans:1, cat:"منتخبات" },
+    { q:"كم هو عدد دوائر كرة القدم الكلاسيكية (الخماسيات السوداء)؟", opts:["12","16","20","32"], ans:2, cat:"معلومة" },
+    { q:"ما اسم الحكم الذي يقف خلف المرمى؟", opts:["حكم خط العرض","حكم المرمى","ناظر المرمى","لا يوجد"], ans:0, cat:"قواعد" },
+    { q:"ما الدولة التي ستستضيف كأس العالم 2030 (جزء كبير منه)؟", opts:["السعودية","المغرب وإسبانيا والبرتغال","البرازيل","الهند"], ans:1, cat:"كأس العالم" },
+  ],
+  medium: [
+    { q:"من هو الهداف التاريخي لدوري أبطال أوروبا؟", opts:["ميسي","رونالدو","مولر","راؤول"], ans:1, cat:"بطولات" },
+    { q:"في أي عام فاز المنتخب الفرنسي بأول كأس عالم له؟", opts:["1994","1998","2002","2006"], ans:1, cat:"كأس العالم" },
+    { q:"ما عدد مرات فوز ريال مدريد بدوري الأبطال؟", opts:["12","13","14","15"], ans:3, cat:"أندية" },
+    { q:"أي لاعب سجّل هدف 'يد الله'؟", opts:["بيليه","رونالدو","مارادونا","زيدان"], ans:2, cat:"تاريخ" },
+    { q:"ما الدولة التي فازت بكأس العالم 2022 في قطر؟", opts:["البرازيل","فرنسا","الأرجنتين","ألمانيا"], ans:2, cat:"كأس العالم" },
+    { q:"من هو أصغر لاعب يسجل في كأس العالم؟", opts:["ميسي","بيليه","روني","إيرانيان"], ans:1, cat:"أرقام" },
+    { q:"أي فريق فاز بالدوري الإنجليزي أكثر من غيره؟", opts:["ليفربول","آرسنال","مانشستر يونايتد","مانشستر سيتي"], ans:2, cat:"أندية" },
+    { q:"من هو المدرب الذي فاز بكأس العالم لاعباً وكذلك مدرباً؟", opts:["زيدان","ديديه ديشان","بيكنباور","كلينسمان"], ans:2, cat:"تاريخ" },
+    { q:"ما الملعب الأكبر سعة في العالم لكرة القدم؟", opts:["سانتياغو برنابيو","كامب نو","نارندرا مودي","ملعب رونغرادو"], ans:3, cat:"ملاعب" },
+    { q:"كم هدفاً سجل غيرد مولر في كأس العالم 1970؟", opts:["8","10","12","14"], ans:1, cat:"أرقام" },
+    { q:"من هو المدرب الذي قاد ليستر سيتي للقب الدوري الإنجليزي 2016؟", opts:["كلوب","مورينيو","رانييري","واردي"], ans:2, cat:"دوريات" },
+    { q:"ما هي الدولة التي لم تخسر في مرحلة المجموعات بكأس عالم كاملة ثم خرجت قبل النهاية؟", opts:["إيطاليا 2010","إسبانيا 2014","ألمانيا 2018","فرنسا 2002"], ans:2, cat:"تاريخ" },
+    { q:"كم عدد كؤوس العالم التي فاز بها رونالدو البرازيلي؟", opts:["1","2","3","4"], ans:1, cat:"أرقام" },
+    { q:"من هو أسرع لاعب سجل هدفاً في دوري الأبطال؟", opts:["ميسي","رونالدو","إيجي","شيرر"], ans:2, cat:"أرقام" },
+    { q:"في أي عام انتهى مشوار المنتخب الإيطالي الدفاعي بخروج مبكر مُخزٍ؟", opts:["2010","2014","2018","2022"], ans:2, cat:"تاريخ" },
+    { q:"ما هو الرقم القياسي لأهداف موسم واحد في دوري أبطال أوروبا (فردي)؟", opts:["15","16","17","18"], ans:2, cat:"أرقام" },
+    { q:"أي دولة لم تُقصَ منذ كأس عالم 1930 (شاركت في الجميع)؟", opts:["برازيل","ألمانيا","إيطاليا","الأرجنتين"], ans:0, cat:"تاريخ" },
+    { q:"من هو مدرب منتخب إسبانيا الذي فاز بثلاث بطولات متتالية؟", opts:["لويس إنريكي","أراغونيس وديل بوسكي","كيليتش","أنشيلوتي"], ans:1, cat:"تاريخ" },
+    { q:"ما عدد أهداف جايرد إبراهيموفيتش في الدوريات الكبرى الأوروبية؟", opts:["300","350","400","450"], ans:3, cat:"لاعبون" },
+    { q:"ما أطول سلسلة مباريات دون هزيمة في الدوري الإيطالي؟", opts:["58 مباراة","102 مباراة","49 مباراة","33 مباراة"], ans:0, cat:"أرقام" },
+  ],
+  hard: [
+    { q:"كم هدفاً سجل ليونيل ميسي في موسم 2011-2012 بكل المسابقات؟", opts:["73","79","91","85"], ans:2, cat:"أرقام" },
+    { q:"من هو أول لاعب أفريقي يفوز بجائزة الكرة الذهبية؟", opts:["صموئيل إيتو","جورج ويا","دروغبا","إبراهيموفيتش"], ans:1, cat:"جوائز" },
+    { q:"ما عدد الأهداف التي سجلها رونالدو في رحلته كلها مع ريال مدريد؟", opts:["405","430","450","473"], ans:3, cat:"أرقام" },
+    { q:"في أي دقيقة سجل أندريس إنييستا هدف نهائي كأس العالم 2010؟", opts:["110","116","120","108"], ans:1, cat:"تاريخ" },
+    { q:"ما اسم أول مدرب يفوز بدوري الأبطال مع فريقَين مختلفَين؟", opts:["مورينيو","أنشيلوتي","زيدان","كلوب"], ans:1, cat:"تاريخ" },
+    { q:"ما عدد كؤوس الدوري الإيطالي التي فاز بها يوفنتوس متتالية قبل إدانته؟", opts:["7","8","9","10"], ans:2, cat:"أندية" },
+    { q:"أي لاعب حمل القميص رقم 10 في نهائي كأس العالم 1998 لفرنسا؟", opts:["زيدان","دوغاري","جوركوف","أنييلكا"], ans:0, cat:"تاريخ" },
+    { q:"ما الفريق الذي هزم برشلونة 8-2 في دوري الأبطال 2020؟", opts:["ليفربول","مانشستر سيتي","بايرن ميونخ","يوفنتوس"], ans:2, cat:"أندية" },
+    { q:"ما الرقم القياسي لأهداف هداف الدوري الإسباني في موسم واحد؟", opts:["50","55","60","65"], ans:1, cat:"أرقام" },
+    { q:"من هو حارس مرمى ليستر سيتي خلال موسم اللقب المعجزة 2015-16؟", opts:["شميشل","كاسيياس","شيلفر","هوث"], ans:0, cat:"لاعبون" },
+    { q:"ما هي الدولة التي نظمت كأس العالم مرتين قبل 1998؟", opts:["ألمانيا","إيطاليا","فرنسا","المكسيك"], ans:3, cat:"تاريخ" },
+    { q:"من هو أصغر مدرب يفوز بدوري أبطال أوروبا؟", opts:["بيب غوارديولا","زيدان","مورينيو","أنشيلوتي"], ans:0, cat:"تاريخ" },
+    { q:"ما عدد أهداف لوكا موديريتش في دوري الأبطال طوال مسيرته؟", opts:["15","20","27","33"], ans:2, cat:"أرقام" },
+    { q:"ما هي الدولة التي أُقيمت فيها أولى نسخ دوري الأبطال (كأس الأندية الأوروبية) عام 1956؟", opts:["إسبانيا","فرنسا","إيطاليا","إنجلترا"], ans:0, cat:"تاريخ" },
+    { q:"كم مباراة لعب كافو مع المنتخب البرازيلي؟", opts:["142","148","160","165"], ans:0, cat:"أرقام" },
+    { q:"ما عدد البطولات الدولية التي فاز بها بيليه في مسيرته؟", opts:["3","4","5","6"], ans:0, cat:"لاعبون" },
+    { q:"من هو صاحب أسرع هدف في تاريخ الدوريات الأوروبية الكبرى؟", opts:["هاكان شوكور","جيمي فلويد هاسيلبايك","توفيق محرز","آلان شيرر"], ans:0, cat:"أرقام" },
+    { q:"في أي موسم سجل ميسي أقل عدد أهداف مع برشلونة في دوري الدوريات؟", opts:["2005-06","2006-07","2007-08","2008-09"], ans:0, cat:"أرقام" },
+    { q:"ما هو الرقم القياسي لعدد الألقاب الوطنية التي فاز بها مدرب واحد؟", opts:["20","25","30","35"], ans:1, cat:"تاريخ" },
+    { q:"ما عدد مرات فوز ريال مدريد بالدوري الإسباني حتى 2024؟", opts:["31","33","35","36"], ans:3, cat:"أندية" },
+  ]
+};
+
+// ============================================================
+//  GAME STATE
+// ============================================================
+let players = [];
+let questionsPerPlayer = 10;
+let selectedLevel = null;
+let levelTimes = { easy: 20, medium: 17, hard: 15 };
+
+let gameData = {
+  currentPlayerIndex: 0,
+  currentQuestionIndex: 0,
+  playerScores: [],
+  playerCorrect: [],
+  usedQuestions: [],
+  currentQuestions: [],
+  timer: null,
+  timeLeft: 0,
+  answered: false,
+  soundOn: true,
+};
+
+// ============================================================
+//  AUDIO
+// ============================================================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let ctx = null;
+
+function getCtx() {
+  if (!ctx) ctx = new AudioCtx();
+  return ctx;
+}
+
+function beep(freq, dur, type='sine', vol=0.3) {
+  if (!gameData.soundOn) return;
+  try {
+    const c = getCtx();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.connect(g); g.connect(c.destination);
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    o.start(); o.stop(c.currentTime + dur);
+  } catch(e){}
+}
+
+function playCorrect() {
+  beep(523, 0.1); setTimeout(()=>beep(659,0.1),120); setTimeout(()=>beep(784,0.2),240);
+}
+
+function playWrong() {
+  beep(200, 0.15, 'sawtooth', 0.2);
+}
+
+function playTick() {
+  beep(880, 0.05, 'square', 0.1);
+}
+
+function playTimeout() {
+  beep(150, 0.4, 'sawtooth', 0.25);
+}
+
+function playTransition() {
+  beep(440, 0.1); setTimeout(()=>beep(550,0.1),100);
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goHome() {
+  clearInterval(gameData.timer);
+  showScreen('screenHome');
+  document.getElementById('mainHeader').style.display = '';
+}
+
+function goToSetup() {
+  showScreen('screenSetup');
+  if (players.length === 0) { addPlayer(); addPlayer(); }
+  renderPlayers();
+}
+
+// ============================================================
+//  SETUP
+// ============================================================
+function addPlayer() {
+  if (players.length >= 6) return;
+  players.push('');
+  renderPlayers();
+  if (players.length >= 6) document.getElementById('addPlayerBtn').style.display = 'none';
+}
+
+function removePlayer(i) {
+  if (players.length <= 2) return;
+  players.splice(i, 1);
+  renderPlayers();
+  document.getElementById('addPlayerBtn').style.display = '';
+}
+
+function renderPlayers() {
+  const list = document.getElementById('playersList');
+  list.innerHTML = '';
+  players.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.innerHTML = `
+      <div class="player-num">${i+1}</div>
+      <input type="text" placeholder="اسم اللاعب ${i+1}" value="${p}"
+        oninput="players[${i}]=this.value" maxlength="20">
+      ${players.length > 2 ? `<button class="btn-remove" onclick="removePlayer(${i})">✕</button>` : ''}
+    `;
+    list.appendChild(row);
+  });
+}
+
+function changeCount(d) {
+  questionsPerPlayer = Math.min(20, Math.max(5, questionsPerPlayer + d));
+  document.getElementById('countDisplay').textContent = questionsPerPlayer;
+}
+
+function selectLevel(lvl, el) {
+  selectedLevel = lvl;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function startGame() {
+  // Validate
+  const names = players.map((p,i) => p.trim() || `لاعب ${i+1}`);
+  if (!selectedLevel) { alert('يرجى اختيار مستوى أولاً'); return; }
+
+  players = names;
+  gameData.currentPlayerIndex = 0;
+  gameData.playerScores = new Array(players.length).fill(0);
+  gameData.playerCorrect = new Array(players.length).fill(0);
+  gameData.usedQuestions = [];
+
+  document.getElementById('mainHeader').style.display = 'none';
+  showTransitionScreen(0, false);
+}
+
+// ============================================================
+//  TRANSITION
+// ============================================================
+function showTransitionScreen(playerIdx, showPrevScore) {
+  const name = players[playerIdx];
+  document.getElementById('transitionName').textContent = name;
+  document.getElementById('transitionEmoji').textContent = ['⚽','🏆','🥇','🎯','👑','🔥'][playerIdx % 6];
+
+  if (showPrevScore && playerIdx > 0) {
+    const prev = players[playerIdx - 1];
+    document.getElementById('transitionSubtitle').textContent = `انتهى دور ${prev}!`;
+    const sc = document.getElementById('transitionPrevScore');
+    sc.style.display = 'block';
+    sc.textContent = `${gameData.playerScores[playerIdx-1]} نقطة`;
+  } else {
+    document.getElementById('transitionSubtitle').textContent = 'استعد للإجابة!';
+    document.getElementById('transitionPrevScore').style.display = 'none';
+  }
+
+  gameData.currentPlayerIndex = playerIdx;
+  playTransition();
+  showScreen('screenTransition');
+}
+
+function beginPlayerTurn() {
+  prepareQuestions();
+  gameData.currentQuestionIndex = 0;
+  gameData.answered = false;
+  loadQuestion();
+  showScreen('screenGame');
+}
+
+// ============================================================
+//  QUESTIONS
+// ============================================================
+function prepareQuestions() {
+  const pool = [...allQuestions[selectedLevel]];
+  // Shuffle
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  gameData.currentQuestions = pool.slice(0, questionsPerPlayer);
+}
+
+function loadQuestion() {
+  const pi = gameData.currentPlayerIndex;
+  const qi = gameData.currentQuestionIndex;
+  const q = gameData.currentQuestions[qi];
+  const total = questionsPerPlayer;
+  const timeLim = levelTimes[selectedLevel];
+
+  // Header
+  document.getElementById('gamePlayerName').textContent = players[pi];
+  document.getElementById('gamePlayerAvatar').textContent = players[pi][0] || '?';
+  document.getElementById('gameScore').textContent = gameData.playerScores[pi];
+
+  // Progress
+  const pct = Math.round((qi / total) * 100);
+  document.getElementById('qProgressLabel').textContent = `سؤال ${qi+1} من ${total}`;
+  document.getElementById('qProgressPct').textContent = `${pct}%`;
+  document.getElementById('qProgressFill').style.width = pct + '%';
+
+  // Question
+  document.getElementById('qNum').textContent = `سؤال ${qi+1}`;
+  document.getElementById('qCat').textContent = q.cat;
+  document.getElementById('qText').textContent = q.q;
+
+  // Options
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['أ','ب','ج','د'];
+  const shuffled = shuffleOptions(q.opts, q.ans);
+  shuffled.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span>${opt}`;
+    btn.onclick = () => selectAnswer(i, shuffled.correctIndex, btn);
+    grid.appendChild(btn);
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedbackBox');
+  fb.style.display = 'none'; fb.className = 'feedback';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('bonusDisplay').textContent = '+0';
+
+  // Timer
+  startTimer(timeLim);
+  gameData.answered = false;
+}
+
+function shuffleOptions(opts, correctIdx) {
+  const indexed = opts.map((o, i) => ({ o, i }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const newCorrect = indexed.findIndex(x => x.i === correctIdx);
+  return { opts: indexed.map(x => x.o), correctIndex: newCorrect };
+}
+
+// ============================================================
+//  TIMER
+// ============================================================
+function startTimer(seconds) {
+  clearInterval(gameData.timer);
+  gameData.timeLeft = seconds;
+  updateTimerUI(seconds, seconds);
+
+  gameData.timer = setInterval(() => {
+    gameData.timeLeft--;
+    updateTimerUI(gameData.timeLeft, seconds);
+
+    // Bonus display
+    const bonus = calcBonus(gameData.timeLeft, seconds);
+    document.getElementById('bonusDisplay').textContent = `+${bonus}`;
+
+    if (gameData.timeLeft <= 5) playTick();
+
+    if (gameData.timeLeft <= 0) {
+      clearInterval(gameData.timer);
+      if (!gameData.answered) timeOut();
+    }
+  }, 1000);
+}
+
+function updateTimerUI(t, max) {
+  const num = document.getElementById('timerNum');
+  const circle = document.getElementById('timerCircle');
+  const r = 31;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (t / max) * circ;
+  circle.style.strokeDasharray = circ;
+  circle.style.strokeDashoffset = offset;
+  num.textContent = t;
+
+  if (t <= 5) {
+    circle.style.stroke = 'var(--red)';
+    num.style.color = 'var(--red)';
+  } else if (t <= 10) {
+    circle.style.stroke = 'var(--gold)';
+    num.style.color = 'var(--gold)';
+  } else {
+    circle.style.stroke = 'var(--green)';
+    num.style.color = 'var(--green)';
+  }
+}
+
+function calcBonus(t, max) {
+  return Math.max(0, Math.floor((t / max) * 5));
+}
+
+function timeOut() {
+  gameData.answered = true;
+  playTimeout();
+
+  // Show correct answer
+  const btns = document.querySelectorAll('.option-btn');
+  const q = gameData.currentQuestions[gameData.currentQuestionIndex];
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === gameData.currentQuestions[gameData.currentQuestionIndex]._correctIndex) b.classList.add('correct');
+  });
+
+  showFeedback(false, 'انتهى الوقت! ⏰', null);
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+// ============================================================
+//  ANSWER
+// ============================================================
+function selectAnswer(chosen, correct, btn) {
+  if (gameData.answered) return;
+  gameData.answered = true;
+  clearInterval(gameData.timer);
+
+  const pi = gameData.currentPlayerIndex;
+  const timeLim = levelTimes[selectedLevel];
+  const bonus = calcBonus(gameData.timeLeft, timeLim);
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  if (chosen === correct) {
+    const pts = 10 + bonus;
+    gameData.playerScores[pi] += pts;
+    gameData.playerCorrect[pi]++;
+    btn.classList.add('correct');
+    btn.classList.add('pulse-correct');
+    playCorrect();
+    showFeedback(true, `✅ إجابة صحيحة! +${pts} نقطة`, pts);
+    document.getElementById('gameScore').textContent = gameData.playerScores[pi];
+  } else {
+    btn.classList.add('wrong');
+    btn.classList.add('shake');
+    btns[correct].classList.add('correct');
+    playWrong();
+    const q = gameData.currentQuestions[gameData.currentQuestionIndex];
+    showFeedback(false, `❌ خطأ! الإجابة: ${q.opts[correct]}`, null);
+  }
+
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+function showFeedback(correct, msg, pts) {
+  const fb = document.getElementById('feedbackBox');
+  fb.textContent = msg;
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.style.display = 'block';
+}
+
+// ============================================================
+//  NEXT
+// ============================================================
+function nextQuestion() {
+  gameData.currentQuestionIndex++;
+
+  if (gameData.currentQuestionIndex >= questionsPerPlayer) {
+    // Player done
+    const pi = gameData.currentPlayerIndex;
+    if (pi + 1 >= players.length) {
+      showResults();
+    } else {
+      showTransitionScreen(pi + 1, true);
+    }
+    return;
+  }
+
+  loadQuestion();
+}
+
+// ============================================================
+//  RESULTS
+// ============================================================
+function showResults() {
+  clearInterval(gameData.timer);
+  const sorted = players.map((name, i) => ({
+    name,
+    score: gameData.playerScores[i],
+    correct: gameData.playerCorrect[i],
+  })).sort((a, b) => b.score - a.score);
+
+  const medals = ['🥇','🥈','🥉'];
+  const rowClasses = ['first','second','third'];
+  const list = document.getElementById('resultsList');
+  list.innerHTML = '';
+
+  sorted.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'result-row ' + (rowClasses[i] || '');
+    div.innerHTML = `
+      <div class="result-rank">${medals[i] || (i+1)+'.'}</div>
+      <div class="result-name">${p.name}</div>
+      <div class="result-correct">✅ ${p.correct}/${questionsPerPlayer}</div>
+      <div class="result-stats">
+        <small>النقاط</small>
+        <strong>${p.score}</strong>
+      </div>
+    `;
+    list.appendChild(div);
+    setTimeout(() => div.style.opacity = '1', i * 120);
+  });
+
+  showScreen('screenResults');
+  document.getElementById('mainHeader').style.display = '';
+  launchConfetti();
+}
+
+// ============================================================
+//  CONFETTI
+// ============================================================
+function launchConfetti() {
+  const colors = ['#00c853','#ffd700','#fff','#29b6f6','#ff6d00'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (2 + Math.random() * 2) + 's';
+      el.style.animationDelay = Math.random() * 0.5 + 's';
+      el.style.width = el.style.height = (6 + Math.random() * 8) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+// ============================================================
+//  MISC
+// ============================================================
+function restartSame() {
+  gameData.playerScores = new Array(players.length).fill(0);
+  gameData.playerCorrect = new Array(players.length).fill(0);
+  gameData.currentPlayerIndex = 0;
+  document.getElementById('mainHeader').style.display = 'none';
+  showTransitionScreen(0, false);
+}
+
+// Auto-init setup on load
+window.onload = function() {
+  addPlayer(); addPlayer();
+  renderPlayers();
+  // Default: medium level
+  selectedLevel = 'medium';
+  document.querySelectorAll('.level-btn')[1].classList.add('selected');
+};
+
+function toggleSound() {
+  gameData.soundOn = !gameData.soundOn;
+  const btn = document.getElementById('soundBtn');
+  btn.textContent = gameData.soundOn ? '🔊' : '🔇';
+  btn.classList.toggle('on', gameData.soundOn);
+}
+</script>
 </body>
 </html>
